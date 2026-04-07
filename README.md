@@ -27,3 +27,10 @@ yarn install
 
 # Update the .env file
 yarn start
+
+# One-time launcher for Windows
+From the project root, run:
+.\start-app.bat
+
+# Or in PowerShell:
+.\start-app.ps1
