@@ -1,5 +1,6 @@
 from fastapi import FastAPI, APIRouter, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -27,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+FRONTEND_BUILD_DIR = ROOT_DIR.parent / "frontend" / "build"
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -404,6 +406,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+if FRONTEND_BUILD_DIR.exists():
+    static_dir = FRONTEND_BUILD_DIR / "static"
+    if static_dir.exists():
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        requested_path = (FRONTEND_BUILD_DIR / full_path).resolve()
+        build_root = FRONTEND_BUILD_DIR.resolve()
+        if (
+            full_path
+            and requested_path.is_relative_to(build_root)
+            and requested_path.exists()
+            and requested_path.is_file()
+        ):
+            return FileResponse(requested_path)
+        return FileResponse(FRONTEND_BUILD_DIR / "index.html")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

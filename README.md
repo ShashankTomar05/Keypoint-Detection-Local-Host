@@ -1,36 +1,33 @@
-# Here are your Instruction
+# Setup
 
-
-# Create virtual environment (recommended)
 python -m venv venv
 
-# Activate virtual environment
-# On Windows:
+# Activate virtual environment on Windows
 venv\Scripts\activate
-# On Mac/Linux:
+
+# Activate virtual environment on Mac/Linux
 source venv/bin/activate
 
-# Install dependencies
-pip install fastapi uvicorn mediapipe opencv-python pillow motor python-dotenv python-multipart
+pip install -r backend/requirements.txt
 
-# Update the .env file
+# Update backend/.env
 
-uvicorn server:app --host 0.0.0.0 --port 8001 --reload
+# Install frontend dependencies
 
+corepack enable
+corepack prepare yarn@1.22.22 --activate
 cd frontend
-
-# Install yarn (if not installed)
-npm install -g yarn
-
-# Install dependencies
 yarn install
+cd ..
 
-# Update the .env file
-yarn start
+# Run frontend and backend together
 
-# One-time launcher for Windows
-From the project root, run:
-.\start-app.bat
+powershell -ExecutionPolicy Bypass -File .\start-app.ps1
 
-# Or in PowerShell:
-.\start-app.ps1
+# Render deployment
+
+Build command:
+pip install -r backend/requirements.txt && corepack enable && corepack prepare yarn@1.22.22 --activate && cd frontend && yarn install --frozen-lockfile && yarn build
+
+Start command:
+cd backend && python -m uvicorn server:app --host 0.0.0.0 --port $PORT
